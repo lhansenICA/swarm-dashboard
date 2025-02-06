@@ -131,6 +131,7 @@ const parseAndRedactDockerData = data => {
   const refreshTime = now.format('YYYY-MM-DD HH:mm:ss');
 
   let nodes = [];
+  let containerCounts = {};
   let networks = [];
   let services = [];
   let tasks = [];
@@ -162,6 +163,7 @@ const parseAndRedactDockerData = data => {
         "Reachability": baseNode["ManagerStatus"]["Reachability"],
       }
     }
+    node["ContainerCount"] = containerCounts[baseNode["ID"]] || 0;
     nodes.push(node);
   }
 
@@ -221,6 +223,12 @@ const parseAndRedactDockerData = data => {
 
   for (let i = 0; i < data.tasks.length; i++) {
     const baseTask = data.tasks[i];
+    if (baseTask["NodeID"] !== undefined) {
+        if (!containerCounts[baseTask["NodeID"]]) {
+            containerCounts[baseTask["NodeID"]] = 0;
+        }
+        containerCounts[baseTask["NodeID"]]++;
+    }
     const lastTimestamp = moment(baseTask["Status"]["Timestamp"]);
     let timestateInfo = undefined;
     if (showTaskTimestamp) {
@@ -391,7 +399,7 @@ const fetchNodeMetrics = ({ lastData, lastRunningNodeExportes, lastNodeMetrics }
                   100 * (1 - ((node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes))
                 );
               }
-
+              
               nodeMetrics.push(metricToSave);
             }
           }
