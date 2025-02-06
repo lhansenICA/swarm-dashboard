@@ -493,6 +493,10 @@ const addNodeMetricsToData = (data, lastNodeMetrics) => {
             info += " | "
           info += `mem: ${nodeMetric.memoryPercent}%`;
         }
+        if (node.ContainerCount !== undefined) {
+            if (info) info += " | ";
+            info += `count: ${node.ContainerCount}`;
+        }
         if (info) {
           node.info = info;
         }
